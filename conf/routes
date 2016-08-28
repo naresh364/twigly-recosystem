@@ -2,12 +2,19 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+GET     /adminLogin                         controllers.AdminLoginController.index()
+POST    /adminLogin                         controllers.AdminLoginController.login()
+GET     /adminLogout                        controllers.AdminLoginController.logout()
+#GET     /adminSignUp                        controllers.AdminLoginController.signUp()
+
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
 # An example controller showing how to write asynchronous code
 GET     /message                    controllers.AsyncController.message
+
+#GET     /fetch
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

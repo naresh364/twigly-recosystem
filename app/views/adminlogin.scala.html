@@ -1,0 +1,43 @@
+@(loginForm: Form[controllers.AdminLoginController.AdminLogin])
+
+@implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
+
+
+<html lang="en">
+<head>
+    <title>Twigly Admin Login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/adminMain.css")'>
+    <link rel="shortcut icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
+</head>
+<body>
+    <div class="container" style="margin-top: 10px;">
+        <div class="panel panel-primary">
+            <div class="panel-heading">Admin Login</div>
+            <div class="panel-body">
+                @if(flash.containsKey("error")) {
+                    <div class="alert alert-danger">
+                        @flash.get("error")
+                    </div>
+                } else {
+                    <div class="alert alert-success">
+                        <strong>Welcome!</strong> Login to continue
+                    </div>
+                }
+                @b3.form(routes.AdminLoginController.login(), 'class -> "form-horizontal", 'role -> "form") {
+                    @b3.email(loginForm("emailAddress"), '_label -> "Login", 'placeholder -> "Email Address")
+                    @b3.password(loginForm("password"), '_label -> "Password", 'placeholder -> "Password")
+                    <div class="form-group">
+                        <div class="controls col-sm-offset-3 col-sm-9">
+                            <input id="Login" type="submit" value="Login" class="btn btn-primary">
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src='@routes.Assets.versioned("javascripts/jquery-2.1.4.min.js")' ></script>
+<script type="text/javascript" src='@routes.Assets.versioned("lib/bootstrap/js/bootstrap.min.js")' ></script>
+</html>
