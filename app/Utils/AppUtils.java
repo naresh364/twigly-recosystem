@@ -41,6 +41,11 @@ public class AppUtils {
 
     }
 
+    public static String getDateStr(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(timeFormatStringParse);
+        return sdf.format(date);
+    }
+
     public static Date addToDate(Date date, int hour, int minutes) {
         Calendar currentCal = Calendar.getInstance();
 

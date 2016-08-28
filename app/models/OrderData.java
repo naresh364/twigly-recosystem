@@ -13,6 +13,10 @@ public class OrderData {
     public int rating;
     public long time;
 
+    public OrderData(){
+
+    }
+
     public OrderData(long user_id, long order_id, long menu_item_id, int quantity,
                 float price, float discount, int rating, long time) {
         this.user_id = user_id;
