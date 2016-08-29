@@ -33,8 +33,6 @@ import java.util.concurrent.CompletionStage;
 @Security.Authenticated(AdminAuthenticator.class)
 public class FetchDataController extends Controller {
 
-    private static final String key_prod = "***REMOVED***";
-    private static final String key_dev = "215db357-66f9-4578-b5d7-a87f8ef";
     private static final String userId = "analytics";
 
     @Inject
@@ -46,18 +44,15 @@ public class FetchDataController extends Controller {
     @Inject
     Configuration configuration;
 
-    public final String KEY_ORDER_DATA = "KEY_ORDER_DATA:";
-    public final String host_prod = "https://twigly.in";
-    public final String host_dev = "http://dev2.twigly.in";
-    public final String fetch_url = "/extapi/analytics/data";
+    public static final String KEY_ORDER_DATA = "KEY_ORDER_DATA:";
+    public static final String fetch_url = "/extapi/analytics/data";
 
 
     public Result fetch(String from, String to) {
         Date fromDate = AppUtils.getDate(from);
         Date toDate = AppUtils.getDate(to);
-        int env = configuration.getInt("server.id",0);
-        String key = (env == 0)?key_prod : key_dev;
-        String host = (env == 0)?host_prod:host_dev;
+        String host = configuration.getString("main_server.host", "");
+        String key = configuration.getString("main_server.auth_key", "0");
         host = host+fetch_url;
 
         Date currentDate = fromDate;
@@ -83,7 +78,7 @@ public class FetchDataController extends Controller {
                 CompletableFuture<JsonNode> completableFuture = promise.toCompletableFuture();
                 try {
                     JsonNode result = completableFuture.get().get("data");
-                    Logger.debug("result =" + result.toString());
+                    //Logger.debug("result =" + result.toString());
                     cacheApi.set(KEY_ORDER_DATA+currentDateStr, result.toString());
                     orderDataList = getOrderDataFromJson(result.toString());
                     Logger.debug("test ="+orderDataList.size());
@@ -93,6 +88,7 @@ public class FetchDataController extends Controller {
                 }
             }
             currentDate = AppUtils.addToDate(currentDate, 24, 0);//next day
+            Logger.debug("Data loaded for :"+currentDateStr+" : total = "+orderDataList.size());
         }
         return ok("Done");
 
@@ -101,10 +97,6 @@ public class FetchDataController extends Controller {
     public Result clear(String from, String to) {
         Date fromDate = AppUtils.getDate(from);
         Date toDate = AppUtils.getDate(to);
-        int env = configuration.getInt("server.id",0);
-        String key = (env == 0)?key_prod : key_dev;
-        String host = (env == 0)?host_prod:host_dev;
-        host = host+fetch_url;
 
         Date currentDate = fromDate;
 
@@ -120,7 +112,7 @@ public class FetchDataController extends Controller {
         return ok("Done");
     }
 
-    private List<OrderData> getOrderDataFromJson(String nodeStr) {
+    public static List<OrderData> getOrderDataFromJson(String nodeStr) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             List<OrderData> dataList = objectMapper.readValue(nodeStr, new TypeReference<List<OrderData>>(){});

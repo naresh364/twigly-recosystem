@@ -5,7 +5,7 @@
 GET     /adminLogin                         controllers.AdminLoginController.index()
 POST    /adminLogin                         controllers.AdminLoginController.login()
 GET     /adminLogout                        controllers.AdminLoginController.logout()
-#GET     /adminSignUp                        controllers.AdminLoginController.signUp()
+GET     /adminSignUp                        controllers.AdminLoginController.signUp()
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.train

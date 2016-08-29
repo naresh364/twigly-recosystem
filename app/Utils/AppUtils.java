@@ -54,6 +54,12 @@ public class AppUtils {
         currentCal.add(Calendar.MINUTE, minutes);
         date = currentCal.getTime();
         return date;
+    }
 
+    public static long numberOfDays(Date date1, Date date2) {
+        long diff = date2.getTime()-date1.getTime();
+        int day = 24*60*60*1000;
+        diff = diff/day;
+        return diff;
     }
 }
