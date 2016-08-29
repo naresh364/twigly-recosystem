@@ -1,12 +1,30 @@
 package controllers;
 
+import Utils.AppUtils;
+import authenticators.AdminAuthenticator;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.inject.Inject;
+import models.OrderData;
+import play.Configuration;
+import play.Logger;
+import play.cache.CacheApi;
+import play.libs.Json;
 import play.mvc.*;
 
+import scala.concurrent.duration.Duration;
+import scala.reflect.ClassTag;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 import training.Trial_class;
 import play.Logger;
 import views.html.*;
+
+import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * This controller contains an action to handle HTTP requests
@@ -20,6 +38,14 @@ public class HomeController extends Controller {
      * this method will be called when the application receives a
      * <code>GET</code> request with a path of <code>/</code>.
      */
+
+    @Inject
+    CacheApi cacheApi;
+
+    @Inject
+    Configuration configuration;
+
+    @Security.Authenticated(AdminAuthenticator.class)
     public Result index() {
         return ok(index.render("Your new application is ready."));
     }
@@ -111,6 +137,32 @@ public class HomeController extends Controller {
         }
 
         return ok(index.render("Your new application is ready."));
+    }
+
+    public List<OrderData> getDataFromCache(String from, String to) {
+        Date fromDate = AppUtils.getDate(from);
+        Date toDate = AppUtils.getDate(to);
+
+        Date currentDate = fromDate;
+
+        if (fromDate.after(toDate)) {
+            return null;
+        }
+
+        int approximateData = (int)AppUtils.numberOfDays(fromDate, toDate)*250;
+        List<OrderData> completeData = new ArrayList<>(approximateData);
+
+        while (!currentDate.after(toDate)) {
+            String currentDateStr = AppUtils.getDateStr(currentDate);
+            String orderDataStr = cacheApi.get(FetchDataController.KEY_ORDER_DATA+currentDateStr);
+            List<OrderData> orderDataList = FetchDataController.getOrderDataFromJson(orderDataStr);
+            if (orderDataList != null && !orderDataList.isEmpty()) {
+                completeData.addAll(orderDataList);
+            }
+            currentDate = AppUtils.addToDate(currentDate, 24, 0);//next day
+            Logger.debug("Data loaded for :"+currentDateStr+" : total = "+orderDataList.size());
+        }
+        return completeData;
     }
 
 }

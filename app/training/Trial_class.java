@@ -8,28 +8,28 @@ import java.util.Scanner;
 import java.lang.*;
 
 public class Trial_class {
-    static int len = 50000;
-    static int totalDishes = 17;
-    static int orderThreshold = 5;
-    static int orderPriority = 10;
-    static int Y[][];
-    static int R[][];
-    static double priorityuser[][];
-    static int priorityusercount;
-    static int user[][];
-    static int usercount;
-    static double meanRating[];
-    static int features = 15;
-    static int lambda = 11;
-    //static int lambda = 0;
-    static double alpha = 0.001;
-    static double error = 0.01;
+    int len = 50000;
+    int totalDishes = 17;
+    int orderThreshold = 5;
+    int orderPriority = 10;
+    int Y[][];
+    int R[][];
+    double priorityuser[][];
+    int priorityusercount;
+    int user[][];
+    int usercount;
+    double meanRating[];
+    int features = 15;
+    int lambda = 11;
+    //int lambda = 0;
+    double alpha = 0.001;
+    double error = 0.01;
     // For vector training
-    //static double X[][];
-    //static double theta[][];
-    static int numberOfIterations = 100;
+    //double X[][];
+    //double theta[][];
+    int numberOfIterations = 100;
 
-    public static double[] optimization(){
+    public double[] optimization(){
         double rho = 0.01;
         double sig = 0.5;
         double internal = 0.1;
@@ -231,8 +231,8 @@ public class Trial_class {
         return X_1;
     }
 
-    public static void dataArranging(int[][] order,int[][] orderdetail, int orderNum,int detailNum){
-        //	public static void dataArranging(int[][] order, int orderNum){
+    public void dataArranging(int[][] order,int[][] orderdetail, int orderNum,int detailNum){
+        //	public void dataArranging(int[][] order, int orderNum){
         int users = 0;
         int user_id[][] = new int[len][2]; // col1 for user id, col2 for number of orders
         int temp = 0;
@@ -434,15 +434,15 @@ public class Trial_class {
          ***************************************************************************************/
     }
 
-    public static double[][] user_data(){
+    public double[][] user_data(){
         return priorityuser;
     }
 
-    public static int user_data_count(){
+    public int user_data_count(){
         return priorityusercount;
     }
 
-    public static void meanRating(){
+    public void meanRating(){
         // Finding the normalize ratings for the dataset
 	/* NORMALIZERATINGS Preprocess data by subtracting mean rating for every
        movie (every row)
@@ -460,7 +460,7 @@ public class Trial_class {
         }
     }
 
-    public static double[] parameterInitialization(){
+    public double[] parameterInitialization(){
         // Here we define the two parameters used for training:
 		/* X : used to train dishes (dishes * features)
 		 * theta : used to train user parameters (users * features)
@@ -482,7 +482,7 @@ public class Trial_class {
 		}*/
     }
 
-    public static double costFunction(double x[]){
+    public double costFunction(double x[]){
         double costFunction = 0;
         // X_grad : Gradient for X function
         // theta_grad : Gradient for theta function
@@ -554,7 +554,7 @@ public class Trial_class {
         return costFunction;
     }
 
-    public static double[] gradFunction(double x[]){
+    public double[] gradFunction(double x[]){
         double X_grad[][] = new double[totalDishes][features];
         double theta_grad[][] = new double[priorityusercount][features];
         double cost_grad[][] = new double[priorityusercount][totalDishes];
