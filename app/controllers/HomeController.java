@@ -102,7 +102,7 @@ public class HomeController extends Controller {
                 }
             }
             for (int i = 0; i < 100; i++) {
-                System.out.println("User id is "+priority_user[i][0] +"and orders "+priority_user[i][1]);
+                System.out.println("User id is "+priority_user[i][0] +" and orders "+priority_user[i][1]);
             }
         }
         catch (Exception e){
