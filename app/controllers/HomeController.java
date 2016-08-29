@@ -47,28 +47,7 @@ public class HomeController extends Controller {
 
     @Security.Authenticated(AdminAuthenticator.class)
     public Result index() {
-        Test test = new Test("naresh", "kumar");
-        ObjectNode node = Json.newObject();
-        node.putPOJO("node", Json.toJson(test));
-        String nodeStr = node.toString();
-        try {
-            cacheApi.set("Naresh", nodeStr);
-        } catch (Exception ex) {
-            Logger.debug("Unable to set cache");
-        }
-
-        String val = cacheApi.get("Naresh");
-        Logger.debug("Val = "+val);
         return ok(index.render("Your new application is ready."));
-    }
-
-    public class Test implements Serializable {
-        public String name;
-        public String value;
-        public Test(String name, String value) {
-            this.name = name;
-            this.value = value;
-        }
     }
 
     public Result train() {
@@ -184,7 +163,6 @@ public class HomeController extends Controller {
             Logger.debug("Data loaded for :"+currentDateStr+" : total = "+orderDataList.size());
         }
         return completeData;
-
     }
 
 }
