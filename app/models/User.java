@@ -23,10 +23,10 @@ public class User {
         Order order = findOrCreateOrder(orderData.order_id);
         if (order == null) {
             order = new Order(orderData);
+            this.orders.add(order);
         } else {
             order.process(orderData);
         }
-        this.orders.add(order);
         int quantity = orderData.quantity > 3?3:orderData.quantity;
         Integer current = itemCountMap.get(orderData.menu_item_id);
         if (current == null) itemCountMap.put(orderData.menu_item_id, quantity);

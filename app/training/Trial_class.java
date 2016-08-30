@@ -259,14 +259,45 @@ public class Trial_class {
                 j++;
             }
             i++;
+            System.out.println("User order size is "+user.orders.size());
         }
 
-        /****************************************************************************************
-         * Block for preparing the data for training the system:
-         *
-         * We will create a training vector matrix of dimensions = No. of users * No. of dishes
-         * where every cell contains the no. of times that particular dish is ordered
-         ***************************************************************************************/
+        System.out.println("The value of order frequency is ");
+        i=0;
+        for (User user : priorityUsers) {
+            int j = 0;
+            for (MenuItemBundle bundle : MenuItemBundle.values()) {
+                Integer count = user.itemBundleCountMap.get(bundle);
+                Integer c1 = (count == null) ? 0 : count;
+                System.out.print(c1+"   ");
+                j++;
+            }
+            System.out.println();
+            i++;
+        }
+
+        System.out.println("The value of Y[i][j] is ");
+        i=0;
+        for (User user : priorityUsers) {
+            int j = 0;
+            for (MenuItemBundle bundle : MenuItemBundle.values()) {
+                System.out.print(Y[i][j]+"   ");
+                j++;
+            }
+            System.out.println();
+            i++;
+        }
+        System.out.println("The value of R[i][j] is ");
+        i=0;
+        for (User user : priorityUsers) {
+            int j = 0;
+            for (MenuItemBundle bundle : MenuItemBundle.values()) {
+                System.out.print(R[i][j]+"   ");
+                j++;
+            }
+            System.out.println();
+            i++;
+        }
     }
 
     public double[][] user_data(){
