@@ -83,6 +83,17 @@ public class HomeController extends Controller {
         return ok(index.render("Your new application is ready."));
     }
 
+    public Result processTestCase() {
+        Map<Long, User> completeData = new HashMap<>();
+        OrderData orderData = new OrderData(21, 10, 5, 1, 150, 0, 5, 1);
+        processOrderData(completeData, orderData);
+        orderData = new OrderData(21, 10, 5, 1, 150, 0, 5, 1);
+        processOrderData(completeData, orderData);
+        Trial_class trial = new Trial_class();
+        trial.dataArranging(completeData);
+        return ok("Done");
+    }
+
     public Map<Long, User> getDataFromCache(String from, String to) {
         Date fromDate = AppUtils.getDate(from);
         Date toDate = AppUtils.getDate(to);
