@@ -4,6 +4,7 @@ import Utils.AppUtils;
 import authenticators.AdminAuthenticator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import models.MenuItemBundle;
 import models.Order;
 import models.OrderData;
 import models.User;
@@ -52,34 +53,30 @@ public class HomeController extends Controller {
 
     public Result train() {
         int features = 15;
-        int totalDishes = 17;
+        int totalDishes = MenuItemBundle.values().length;
         Logger.info("A log message");
-            Trial_class trial = new Trial_class();
-            Map<Long, User> userDatas = getDataFromCache("2016-01-01", "2016-08-27");
-            trial.dataArranging(userDatas);
-            double params[] = trial.optimization();
-            double priority_user[][] = trial.user_data();
-            int priorityusercount = trial.user_data_count();
+        Trial_class trial = new Trial_class();
+        Map<Long, User> userDatas = getDataFromCache("2016-01-01", "2016-08-27");
+        trial.dataArranging(userDatas);
+        double params[] = trial.optimization();
+        int priorityusercount = trial.user_data_count();
 
 
-            double X[][] = new double[totalDishes][features];
-            double theta[][] = new double[priorityusercount][features];
-            int ia = 0;
-            for (int i = 0; i < features; i++) {
-                for (int j = 0; j < totalDishes; j++) {
-                    X[j][i] = params[ia];
-                    ia++;
-                }
+        double X[][] = new double[totalDishes][features];
+        double theta[][] = new double[priorityusercount][features];
+        int ia = 0;
+        for (int i = 0; i < features; i++) {
+            for (int j = 0; j < totalDishes; j++) {
+                X[j][i] = params[ia];
+                ia++;
             }
-            for (int i = 0; i < features; i++) {
-                for (int j = 0; j < priorityusercount; j++) {
-                    theta[j][i] = params[ia];
-                    ia++;
-                }
+        }
+        for (int i = 0; i < features; i++) {
+            for (int j = 0; j < priorityusercount; j++) {
+                theta[j][i] = params[ia];
+                ia++;
             }
-            for (int i = 0; i < 100; i++) {
-                System.out.println("User id is "+priority_user[i][0] +" and orders "+priority_user[i][1]);
-            }
+        }
         return ok(index.render("Your new application is ready."));
     }
 

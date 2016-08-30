@@ -13,10 +13,7 @@ public class Trial_class {
     int orderPriority = 10;
     int Y[][];
     int R[][];
-    double priorityuser[][];
-    int priorityusercount;
-    int user[][];
-    int usercount;
+    List<User> priorityUsers;
     double meanRating[];
     int features = 15;
     int lambda = 11;
@@ -74,7 +71,7 @@ public class Trial_class {
             f0 = f1;
             df0 = df1;
             //System.out.println("i = "+i);
-            for(int j=0;j<(totalDishes+priorityusercount)*features;j++){
+            for(int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                 X_1[j] = X_1[j] + z1*s[j];
             }
 
@@ -83,7 +80,7 @@ public class Trial_class {
             //System.out.println("cost = "+f2);
             df2 = gradFunction(X_1);
             d2 = 0;
-            for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+            for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                 d2 = d2 + df2[j]*s[j];
             }
             f3 = f1;
@@ -111,14 +108,14 @@ public class Trial_class {
                         z2 = z3/2;
                     z2 = Math.max(Math.min(z2, internal*z3),(1-internal)*z3);
                     z1 = z1+z2;
-                    for(int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                    for(int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                         X_1[j] = X_1[j] + z2*s[j];
                     }
                     f2 = costFunction(X_1);
                     df2 = gradFunction(X_1);
                     M = M-1;
                     d2 = 0;
-                    for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                    for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                         d2 = d2 + df2[j]*s[j];
                     }
                     z3 = z3-z2;
@@ -157,14 +154,14 @@ public class Trial_class {
                 d3=d2;
                 z3 = -z2;
                 z1 = z1+z2;
-                for(int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                for(int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                     X_1[j] = X_1[j] + z2*s[j];
                 }
                 f2 = costFunction(X_1);
                 df2 = gradFunction(X_1);
                 M = M-1;
                 d2 = 0;
-                for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                     d2 = d2 + df2[j]*s[j];
                 }
             }
@@ -173,27 +170,27 @@ public class Trial_class {
                 double tot = 0;
                 double tot1 = 0;
                 f1 = f2;
-                for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                     tot = tot + (df2[j]-df1[j])*df2[j];
                     tot1 = tot1+df1[j]*df1[j];
                 }
                 tot = tot/tot1;
-                for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                     s[j] = tot*s[j] - df2[j];
                 }
                 double tmp[] = df1;
                 df1 = df2;
                 df2 = tmp;
                 d2 = 0;
-                for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                     d2 = d2 + df1[j]*s[j];
                 }
                 if(d2>0){
-                    for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                    for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                         s[j] = -1*df1[j];
                     }
                     d2 = 0;
-                    for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                    for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                         d2 = d2 + s[j]*s[j];
                     }
                     d2 = -1*d2;
@@ -213,11 +210,11 @@ public class Trial_class {
                 double tmp[] = df1;
                 df1 = df2;
                 df2 = tmp;
-                for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                     s[j] = -1*df1[j];
                 }
                 d1 = 0;
-                for (int j=0;j<(totalDishes+priorityusercount)*features;j++){
+                for (int j=0;j<(totalDishes+priorityUsers.size())*features;j++){
                     d1 = d1 + s[j]*s[j];
                 }
                 d1 = -1*d1;
@@ -234,7 +231,7 @@ public class Trial_class {
         //	public void dataArranging(int[][] order, int orderNum){
         int temp = 0;
 
-        List<User> priorityUsers = new ArrayList<>();
+        priorityUsers = new ArrayList<>();
 
         for (Map.Entry<Long, User> entry : userData.entrySet()) {
             long orderCount = entry.getValue().orders.size();
@@ -300,12 +297,8 @@ public class Trial_class {
         }
     }
 
-    public double[][] user_data(){
-        return priorityuser;
-    }
-
     public int user_data_count(){
-        return priorityusercount;
+        return priorityUsers.size();
     }
 
     public void meanRating(){
@@ -315,9 +308,9 @@ public class Trial_class {
        [Ynorm, Ymean] = NORMALIZERATINGS(Y, R) normalized Y so that each movie
        has a rating of 0 on average, and returns the mean rating in Ymean.
 	   */
-        meanRating = new double[priorityusercount];
+        meanRating = new double[priorityUsers.size()];
         double total=0;
-        for (int i=0;i<priorityusercount;i++){
+        for (int i=0;i<priorityUsers.size();i++){
             total = 0;
             for(int j=0;j<totalDishes;j++){
                 total = total+Y[i][j];
@@ -331,16 +324,16 @@ public class Trial_class {
 		/* X : used to train dishes (dishes * features)
 		 * theta : used to train user parameters (users * features)
 		 * */
-        double X[] = new double[(totalDishes+priorityusercount)*features];
+        double X[] = new double[(totalDishes+priorityUsers.size())*features];
 
         // Assigning random values to X and theta
-        for (int i=0;i<(totalDishes+priorityusercount)*features;i++){
+        for (int i=0;i<(totalDishes+priorityUsers.size())*features;i++){
             X[i] = Math.random();
         }
         return X;
 		/*  Check for parameter initialization
 
-		for (int i=0;i<priorityusercount;i++){
+		for (int i=0;i<priorityUsers.size();i++){
 			for(int j=0;j<features;j++){
 				System.out.print(theta[i][j] + "   ");
 			}
@@ -354,7 +347,7 @@ public class Trial_class {
         // theta_grad : Gradient for theta function
 
         double X_11[][] = new double[totalDishes][features];
-        double theta_11[][] = new double[priorityusercount][features];
+        double theta_11[][] = new double[priorityUsers.size()][features];
 
         // Assigning the values to X_11 and theta_11
         int ia=0;
@@ -365,7 +358,7 @@ public class Trial_class {
             }
         }
         for(int k=0;k<features;k++){
-            for (int j=0;j<priorityusercount;j++){
+            for (int j=0;j<priorityUsers.size();j++){
                 theta_11[j][k] = x[ia];
                 ia++;
             }
@@ -381,7 +374,7 @@ public class Trial_class {
 			System.out.println();
 		}
 		System.out.println("Printing the value of Theta");
-		for(int k=0;k<priorityusercount;k++){
+		for(int k=0;k<priorityUsers.size();k++){
 			for (int j=0;j<features;j++){
 				System.out.print(theta_11[k][j]  + "   ");
 				//theta_11[k][j] = x[(k+totalDishes)*features + j];
@@ -392,7 +385,7 @@ public class Trial_class {
 
         // Computing cost function
         double beta = 0;
-        for(int i=0;i<priorityusercount;i++){
+        for(int i=0;i<priorityUsers.size();i++){
             for(int j=0;j<totalDishes;j++){
                 beta = 0;
                 for(int k=0;k<features;k++){
@@ -404,7 +397,7 @@ public class Trial_class {
             }
         }
         beta = 0;
-        for(int i=0;i<priorityusercount;i++){
+        for(int i=0;i<priorityUsers.size();i++){
             for(int j=0;j<features;j++){
                 beta = beta + Math.pow(theta_11[i][j],2);
             }
@@ -422,13 +415,13 @@ public class Trial_class {
 
     public double[] gradFunction(double x[]){
         double X_grad[][] = new double[totalDishes][features];
-        double theta_grad[][] = new double[priorityusercount][features];
-        double cost_grad[][] = new double[priorityusercount][totalDishes];
-        double final_var[] = new double[(totalDishes+priorityusercount)*features];
+        double theta_grad[][] = new double[priorityUsers.size()][features];
+        double cost_grad[][] = new double[priorityUsers.size()][totalDishes];
+        double final_var[] = new double[(totalDishes+priorityUsers.size())*features];
         double beta = 0;
 
         double X_11[][] = new double[totalDishes][features];
-        double theta_11[][] = new double[priorityusercount][features];
+        double theta_11[][] = new double[priorityUsers.size()][features];
 
         // Assigning the values to X_11 and theta_11
         int ia = 0;
@@ -440,14 +433,14 @@ public class Trial_class {
         }
 
         for(int k=0;k<features;k++){
-            for (int j=0;j<priorityusercount;j++){
+            for (int j=0;j<priorityUsers.size();j++){
                 theta_11[j][k] = x[ia];
                 ia++;
             }
         }
 
         // computing the gradient
-        for(int i=0;i<priorityusercount;i++){
+        for(int i=0;i<priorityUsers.size();i++){
             for(int j=0;j<totalDishes;j++){
                 beta = 0;
                 for(int k=0;k<features;k++){
@@ -459,7 +452,7 @@ public class Trial_class {
         }
         // differential definition
         // defining for theta_grad
-        for(int i=0;i<priorityusercount;i++){
+        for(int i=0;i<priorityUsers.size();i++){
             for(int j=0;j<features;j++){
                 beta = 0;
                 for(int k=0;k<totalDishes;k++){
@@ -473,7 +466,7 @@ public class Trial_class {
         for(int i=0;i<totalDishes;i++){
             for(int j=0;j<features;j++){
                 beta = 0;
-                for(int k=0;k<priorityusercount;k++){
+                for(int k=0;k<priorityUsers.size();k++){
                     beta = beta+cost_grad[k][i]*theta_11[k][j];
                 }
                 X_grad[i][j] = beta+lambda*X_11[i][j];
@@ -487,9 +480,9 @@ public class Trial_class {
             }
         }
         for(int i=0;i<features;i++){
-            for (int j=0;j<priorityusercount;j++){
+            for (int j=0;j<priorityUsers.size();j++){
                 int temp = (i+totalDishes)*features + j;
-                //System.out.println("Users = "+priorityusercount+"  features = "+features+" Total dishes = "+totalDishes+"  temp"+temp);
+                //System.out.println("Users = "+priorityUsers.size()+"  features = "+features+" Total dishes = "+totalDishes+"  temp"+temp);
                 final_var[ia1] = theta_grad[j][i];
                 ia1++;
             }
