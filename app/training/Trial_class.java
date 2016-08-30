@@ -2,6 +2,7 @@ package training;
 
 import models.MenuItemBundle;
 import models.User;
+import models.UserParams;
 
 import java.util.*;
 import java.lang.*;
@@ -249,9 +250,9 @@ public class Trial_class {
             maxvalue = user.getMaxDishCount();
             int j = 0;
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
-                Integer count = user.itemBundleCountMap.get(bundle).count;
-                Y[i][j] = (count == null ? 1 : ((9*count)/maxvalue)+1);
-                int tempo = (count == null)?0:count;
+                UserParams userParams = user.itemBundleCountMap.get(bundle);
+                Y[i][j] = (userParams == null ? 1 : ((9*userParams.count)/maxvalue)+1);
+                int tempo = (userParams == null)?0:userParams.count;
                 R[i][j] = (user.orders.size() > orderPriority)?1: (tempo > 0 ? 1 : 0);
                 j++;
             }
@@ -264,8 +265,8 @@ public class Trial_class {
         for (User user : priorityUsers) {
             int j = 0;
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
-                Integer count = user.itemBundleCountMap.get(bundle).count;
-                Integer c1 = (count == null) ? 0 : count;
+                UserParams userParams = user.itemBundleCountMap.get(bundle);
+                Integer c1 = (userParams == null) ? 0 : userParams.count;
                 System.out.print(c1+"   ");
                 j++;
             }
