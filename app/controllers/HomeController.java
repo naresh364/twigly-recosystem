@@ -2,12 +2,13 @@ package controllers;
 
 import Utils.AppUtils;
 import authenticators.AdminAuthenticator;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
-import models.MenuItemBundle;
-import models.Order;
-import models.OrderData;
-import models.User;
+import models.*;
 import play.Configuration;
 import play.Logger;
 import play.cache.CacheApi;
@@ -19,6 +20,7 @@ import scala.reflect.ClassTag;
 import java.io.File;
 import java.util.*;
 
+import training.TestModule;
 import training.Trial_class;
 import play.Logger;
 import views.html.*;
@@ -47,16 +49,33 @@ public class HomeController extends Controller {
     @Inject
     Configuration configuration;
 
+    private static CachedUserData mCachedUserData;
+
     public Result index() {
         return ok(index.render("Your new application is ready."));
     }
 
-    public Result train() {
+
+    public Result test(String from, String to) {
+        CachedUserData cachedUserData = retrieveDataFromCache();
+        if (cachedUserData == null) {
+            return badRequest("data not found in the cache. Please train first");
+        }
+
+        Map<Long, User> testDatas = getDataFromCache(from, to);
+
+        TestModule testModule = new TestModule();
+        testModule.dataTesting(cachedUserData, testDatas);
+
+        return ok("Done");
+    }
+
+    public Result train(String from, String to) {
         int features = 15;
         int totalDishes = MenuItemBundle.values().length;
         Logger.info("A log message");
         Trial_class trial = new Trial_class();
-        Map<Long, User> userDatas = getDataFromCache("2016-01-01", "2016-08-27");
+        Map<Long, User> userDatas = getDataFromCache(from, to);
         trial.dataArranging(userDatas);
         double params[] = trial.optimization();
         int priorityusercount = trial.user_data_count();
@@ -77,6 +96,7 @@ public class HomeController extends Controller {
                 ia++;
             }
         }
+
         double ratings[][] = new double[priorityusercount][totalDishes];
         for(int i=0;i<priorityusercount;i++){
             for(int j=0;j<totalDishes;j++){
@@ -85,7 +105,40 @@ public class HomeController extends Controller {
                 }
             }
         }
+
+        //save calculated data to cache
+        CachedUserData userData = new CachedUserData(ratings, trial.getPriorityUsers());
+        saveDataToCache(userData);
         return ok(index.render("Your new application is ready."));
+    }
+
+    public static String key_training_data = "KEY_TRAINING_DATA:";
+    public static String key_training_users = "KEY_TRAINING_USERS:";
+
+    private void saveDataToCache(CachedUserData cachedUserData) {
+        mCachedUserData = cachedUserData;
+        if (true)return;
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode objectNode = objectMapper.valueToTree(cachedUserData.ratings);
+        cacheApi.set(key_training_data, objectNode.toString());
+        ArrayNode objectNode2 = objectMapper.valueToTree(cachedUserData.users);
+        cacheApi.set(key_training_users, objectNode2.toString());
+    }
+
+    private CachedUserData retrieveDataFromCache() {
+        if (true) return mCachedUserData;
+        String dataStr = cacheApi.get(key_training_data);
+        String userStr = cacheApi.get(key_training_users);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            CachedUserData userData = new CachedUserData();
+            userData.users = objectMapper.readValue(userStr , new TypeReference<List<Integer>>(){});
+            userData.ratings = objectMapper.readValue(dataStr, new TypeReference<double[][]>(){});
+            return userData;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     public Result processTestCase() {

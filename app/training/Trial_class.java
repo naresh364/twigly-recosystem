@@ -490,4 +490,7 @@ public class Trial_class {
         return final_var;
     }
 
+    public List<User> getPriorityUsers() {
+        return priorityUsers;
+    }
 }

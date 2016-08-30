@@ -1,11 +1,13 @@
 package Utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by naresh on 28/08/16.
@@ -61,5 +63,40 @@ public class AppUtils {
         int day = 24*60*60*1000;
         diff = diff/day;
         return diff;
+    }
+
+    public static String compress(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            GZIPOutputStream gzip = new GZIPOutputStream(out);
+            gzip.write(str.getBytes());
+            gzip.close();
+            return out.toString("ISO-8859-1");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String decompress(String str) {
+        //TODO
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            GZIPOutputStream gzip = new GZIPOutputStream(out);
+            gzip.write(str.getBytes());
+            gzip.close();
+            return out.toString("ISO-8859-1");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }

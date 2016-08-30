@@ -16,7 +16,8 @@ GET     /message                    controllers.AsyncController.message
 
 GET     /fetch                      controllers.FetchDataController.fetch(from?="-1", to?="-1")
 GET     /clear                      controllers.FetchDataController.clear(from?="-1", to?="-1")
-GET     /train                      controllers.HomeController.train
+GET     /train                      controllers.HomeController.train(from?="-1", to?="-1")
+GET     /test                       controllers.HomeController.test(from?="-1", to?="-1")
 GET     /testcase                   controllers.HomeController.processTestCase()
 
 # Map static resources from the /public folder to the /assets URL path
