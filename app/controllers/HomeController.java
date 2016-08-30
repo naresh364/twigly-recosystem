@@ -77,6 +77,14 @@ public class HomeController extends Controller {
                 ia++;
             }
         }
+        double ratings[][] = new double[priorityusercount][totalDishes];
+        for(int i=0;i<priorityusercount;i++){
+            for(int j=0;j<totalDishes;j++){
+                for(int k=0;k<features;k++){
+                    ratings[i][j] = ratings[i][j] + X[j][k]*theta[i][k];
+                }
+            }
+        }
         return ok(index.render("Your new application is ready."));
     }
 
