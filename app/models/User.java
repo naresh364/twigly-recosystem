@@ -12,7 +12,7 @@ public class User {
     public long user_id;
     public List<Order> orders = new ArrayList<>();
     public Map<Long, Integer> itemCountMap = new HashMap<>();
-    public Map<MenuItemBundle, Integer> itemBundleCountMap = new HashMap<>();
+    public Map<MenuItemBundle, UserParams> itemBundleCountMap = new HashMap<>();
 
     public User(OrderData orderData) {
         process(orderData);
@@ -40,9 +40,14 @@ public class User {
         if (bundle == null) return;
 
         int quantity = orderData.quantity > 3?3:orderData.quantity;
-        Integer current = itemBundleCountMap.get(bundle);
-        if (current == null) itemBundleCountMap.put(bundle, quantity);
-        else itemBundleCountMap.put(bundle, current+quantity);
+        UserParams current = itemBundleCountMap.get(bundle);
+        if (current == null){
+            UserParams userParams = new UserParams(quantity, orderData.rating, orderData.time);
+            itemBundleCountMap.put(bundle, userParams);
+        }
+        else {
+            current.update(quantity, orderData.rating, orderData.time);
+        }
 
     }
 
@@ -59,8 +64,8 @@ public class User {
 
     public int getMaxDishCount() {
         int max = 1;
-        for (Map.Entry<MenuItemBundle, Integer> menuItemBundleIntegerEntry : itemBundleCountMap.entrySet()) {
-            if (max < menuItemBundleIntegerEntry.getValue()) max = menuItemBundleIntegerEntry.getValue();
+        for (Map.Entry<MenuItemBundle, UserParams> menuItemBundleEntry : itemBundleCountMap.entrySet()) {
+            if (max < menuItemBundleEntry.getValue().count) max = menuItemBundleEntry.getValue().count;
         }
         return max;
     }

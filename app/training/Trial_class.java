@@ -249,7 +249,7 @@ public class Trial_class {
             maxvalue = user.getMaxDishCount();
             int j = 0;
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
-                Integer count = user.itemBundleCountMap.get(bundle);
+                Integer count = user.itemBundleCountMap.get(bundle).count;
                 Y[i][j] = (count == null ? 1 : ((9*count)/maxvalue)+1);
                 int tempo = (count == null)?0:count;
                 R[i][j] = (user.orders.size() > orderPriority)?1: (tempo > 0 ? 1 : 0);
@@ -264,7 +264,7 @@ public class Trial_class {
         for (User user : priorityUsers) {
             int j = 0;
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
-                Integer count = user.itemBundleCountMap.get(bundle);
+                Integer count = user.itemBundleCountMap.get(bundle).count;
                 Integer c1 = (count == null) ? 0 : count;
                 System.out.print(c1+"   ");
                 j++;
