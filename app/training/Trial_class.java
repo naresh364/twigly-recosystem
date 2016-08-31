@@ -10,8 +10,8 @@ import java.lang.*;
 public class Trial_class {
     int len = 50000;
     int totalDishes = 17;
-    int orderThreshold = 5;
-    int orderPriority = 10;
+    int orderThreshold = 1;
+    int orderPriority = 8;
     int Y[][];
     int R[][];
     List<User> priorityUsers;
@@ -245,13 +245,21 @@ public class Trial_class {
         Y = new int[priorityUsers.size()][totalBundleCount];
         R = new int[priorityUsers.size()][totalBundleCount];
         int maxvalue = 0;
+        float rating = 0;
+        double meanValue=0;
+        double stdDev = 0;
+        double normRating=0;
         int i=0;
         for (User user : priorityUsers) {
             maxvalue = user.getMaxDishCount();
             int j = 0;
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
                 UserParams userParams = user.itemBundleCountMap.get(bundle);
-                Y[i][j] = (userParams == null ? 1 : ((9*userParams.count)/maxvalue)+1);
+
+                Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)*userParams.averageRating/maxvalue)+1);
+                Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)*(userParams.averageRating)/maxvalue)+1);
+                //Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)*Math.pow(userParams.averageRating,2)/maxvalue)+1);
+                //Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)/maxvalue)+1);
                 int tempo = (userParams == null)?0:userParams.count;
                 R[i][j] = (user.orders.size() > orderPriority)?1: (tempo > 0 ? 1 : 0);
                 j++;
@@ -267,33 +275,10 @@ public class Trial_class {
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
                 UserParams userParams = user.itemBundleCountMap.get(bundle);
                 Integer c1 = (userParams == null) ? 0 : userParams.count;
-                System.out.print(c1+"   ");
+                //System.out.print(c1+"   ");
                 j++;
             }
-            System.out.println();
-            i++;
-        }
-
-        System.out.println("The value of Y[i][j] is ");
-        i=0;
-        for (User user : priorityUsers) {
-            int j = 0;
-            for (MenuItemBundle bundle : MenuItemBundle.values()) {
-                System.out.print(Y[i][j]+"   ");
-                j++;
-            }
-            System.out.println();
-            i++;
-        }
-        System.out.println("The value of R[i][j] is ");
-        i=0;
-        for (User user : priorityUsers) {
-            int j = 0;
-            for (MenuItemBundle bundle : MenuItemBundle.values()) {
-                System.out.print(R[i][j]+"   ");
-                j++;
-            }
-            System.out.println();
+            //System.out.println();
             i++;
         }
     }

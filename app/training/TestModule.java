@@ -17,9 +17,9 @@ public class TestModule {
 		for (long userId: cachedUserData.getUsers()) {
 			User user = userData.get(userId);
 			if (user == null) {
-				System.out.print("User not found :"+userId);
-				notOrderingUsers++;
+				//System.out.print("User not found :"+userId);
 			} else {
+				notOrderingUsers++;
 				int index = cachedUserData.getUsers().indexOf(userId);
 				double userRating[] = cachedUserData.getRatings()[index];
 				List<Pair<MenuItemBundle, Double>> bundleDoubleRating = new ArrayList<>();
@@ -72,7 +72,9 @@ public class TestModule {
 		printArray(failure);
 		System.out.println("Total");
 		printArray(total);
-		System.out.println("not done for users :"+notOrderingUsers);
+		int sumValue = userData.size() - notOrderingUsers;
+		System.out.println("done for users :"+notOrderingUsers);
+		System.out.println("not done for users :"+sumValue);
 
 
 	}
