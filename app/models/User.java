@@ -11,6 +11,7 @@ import java.util.Map;
  * Created by naresh on 29/08/16.
  */
 public class User {
+    public static final int features = 15;
     public long user_id;
     public List<Order> orders = new ArrayList<>();
     public Map<Long, Integer> itemCountMap = new HashMap<>();
@@ -21,7 +22,7 @@ public class User {
     }
 
     public void process(OrderData orderData) {
-        if (!AppUtils.isLunchTime(orderData.time)) return;
+        //if (!AppUtils.isLunchTime(orderData.time)) return;
         this.user_id = orderData.user_id;
         Order order = findOrCreateOrder(orderData.order_id);
         if (order == null) {
