@@ -99,4 +99,13 @@ public class AppUtils {
             return null;
         }
     }
+
+    public static boolean isLunchTime(long time) {
+        Date date = new Date(time);
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
+        return (hourOfDay <=15);//sun or sat
+    }
+
 }

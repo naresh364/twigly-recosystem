@@ -1,5 +1,7 @@
 package models;
 
+import Utils.AppUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,7 @@ public class User {
     }
 
     public void process(OrderData orderData) {
+        if (!AppUtils.isLunchTime(orderData.time)) return;
         this.user_id = orderData.user_id;
         Order order = findOrCreateOrder(orderData.order_id);
         if (order == null) {
