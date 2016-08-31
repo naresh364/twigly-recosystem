@@ -245,13 +245,18 @@ public class Trial_class {
         Y = new int[priorityUsers.size()][totalBundleCount];
         R = new int[priorityUsers.size()][totalBundleCount];
         int maxvalue = 0;
+        float rating = 0;
+        double meanValue=0;
+        double stdDev = 0;
+        double normRating=0;
         int i=0;
         for (User user : priorityUsers) {
             maxvalue = user.getMaxDishCount();
             int j = 0;
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
                 UserParams userParams = user.itemBundleCountMap.get(bundle);
-                Y[i][j] = (userParams == null ? 1 : ((9*userParams.count)/maxvalue)+1);
+                rating = userParams.averageRating;
+                Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)*rating/maxvalue)+1);
                 int tempo = (userParams == null)?0:userParams.count;
                 R[i][j] = (user.orders.size() > orderPriority)?1: (tempo > 0 ? 1 : 0);
                 j++;
