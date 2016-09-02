@@ -2,26 +2,32 @@ package training;
 
 import javafx.util.Pair;
 import models.*;
+import play.cache.CacheApi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
 public class TestModule {
-	public void dataTesting(CachedUserData cachedUserData, Map<Long, User> userData) {
-		int notOrderingUsers = 0;
+	public void dataTesting(CacheApi cacheApi, Map<Long, User> userData) {
+		int foundUsers = 0;
+		int notFoundUsers = 0;
 		int success[] = new int[4];
 		int failure[] = new int[4];
 		int total[] = new int[4];
 
-		for (long userId: cachedUserData.getUsers()) {
-			User user = userData.get(userId);
+		for (Map.Entry<Long, User> entry: userData.entrySet()) {
+			User user = entry.getValue();
 			if (user == null) {
 				//System.out.print("User not found :"+userId);
 			} else {
-				notOrderingUsers++;
-				int index = cachedUserData.getUsers().indexOf(userId);
-				double userRating[] = cachedUserData.getRatings()[index];
+				double userRating[] = CachedUserData.retrieveDataFromCache(cacheApi, user.user_id);
+				if (userRating == null) {
+					//System.out.print("User not found :"+userId);
+					notFoundUsers++;
+					continue;
+				}
+				foundUsers++;
 				List<Pair<MenuItemBundle, Double>> bundleDoubleRating = new ArrayList<>();
 				int i = 0;
 				for (double rating : userRating) {
@@ -72,8 +78,9 @@ public class TestModule {
 		printArray(failure);
 		System.out.println("Total");
 		printArray(total);
-		int sumValue = userData.size() - notOrderingUsers;
-		System.out.println("done for users :"+notOrderingUsers);
+		int sumValue = userData.size() - foundUsers;
+		System.out.println("done for users :"+foundUsers);
+		System.out.println("users entry not found:"+notFoundUsers);
 		System.out.println("not done for users :"+sumValue);
 
 

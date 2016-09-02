@@ -57,15 +57,10 @@ public class HomeController extends Controller {
 
 
     public Result test(String from, String to) {
-        CachedUserData cachedUserData = retrieveDataFromCache();
-        if (cachedUserData == null) {
-            return badRequest("data not found in the cache. Please train first");
-        }
-
         Map<Long, User> testDatas = getDataFromCache(from, to);
 
         TestModule testModule = new TestModule();
-        testModule.dataTesting(cachedUserData, testDatas);
+        testModule.dataTesting(cacheApi, testDatas);
 
         return ok("Done");
     }
@@ -108,37 +103,8 @@ public class HomeController extends Controller {
 
         //save calculated data to cache
         CachedUserData userData = new CachedUserData(ratings, trial.getPriorityUsers());
-        saveDataToCache(userData);
+        CachedUserData.saveDataToCache(cacheApi, userData);
         return ok(index.render("Your new application is ready."));
-    }
-
-    public static String key_training_data = "KEY_TRAINING_DATA:";
-    public static String key_training_users = "KEY_TRAINING_USERS:";
-
-    private void saveDataToCache(CachedUserData cachedUserData) {
-        mCachedUserData = cachedUserData;
-        if (true)return;
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode objectNode = objectMapper.valueToTree(cachedUserData.ratings);
-        cacheApi.set(key_training_data, objectNode.toString());
-        ArrayNode objectNode2 = objectMapper.valueToTree(cachedUserData.users);
-        cacheApi.set(key_training_users, objectNode2.toString());
-    }
-
-    private CachedUserData retrieveDataFromCache() {
-        if (true) return mCachedUserData;
-        String dataStr = cacheApi.get(key_training_data);
-        String userStr = cacheApi.get(key_training_users);
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            CachedUserData userData = new CachedUserData();
-            userData.users = objectMapper.readValue(userStr , new TypeReference<List<Integer>>(){});
-            userData.ratings = objectMapper.readValue(dataStr, new TypeReference<double[][]>(){});
-            return userData;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
     }
 
     public Result processTestCase() {

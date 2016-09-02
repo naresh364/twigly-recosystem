@@ -265,7 +265,7 @@ public class Trial_class {
                 j++;
             }
             i++;
-            System.out.println("User order size is "+user.orders.size());
+            //System.out.println("User order size is "+user.orders.size());
         }
 
         System.out.println("The value of order frequency is ");
