@@ -17,6 +17,10 @@ public class User {
     public Map<Long, Integer> itemCountMap = new HashMap<>();
     public Map<MenuItemBundle, UserParams> itemBundleCountMap = new HashMap<>();
 
+    public User() {
+
+    }
+
     public User(OrderData orderData) {
         process(orderData);
     }
@@ -73,4 +77,5 @@ public class User {
         }
         return max;
     }
+
 }

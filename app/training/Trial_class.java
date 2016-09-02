@@ -233,6 +233,7 @@ public class Trial_class {
         int temp = 0;
 
         priorityUsers = new ArrayList<>();
+        priorityUsers.add(0, new User());
 
         for (Map.Entry<Long, User> entry : userData.entrySet()) {
             long orderCount = entry.getValue().orders.size();

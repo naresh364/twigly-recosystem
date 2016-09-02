@@ -19,6 +19,7 @@ import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -79,7 +80,19 @@ public class FetchDataController extends Controller {
                 try {
                     JsonNode result = completableFuture.get().get("data");
                     //Logger.debug("result =" + result.toString());
-                    cacheApi.set(KEY_ORDER_DATA+currentDateStr, result.toString());
+                    try {
+                        cacheApi.set(KEY_ORDER_DATA + currentDateStr, result.toString());
+                    } catch (JedisConnectionException ex) {
+                        ex.printStackTrace();
+                        //retry
+                        try {
+                            Logger.debug("GOing to sleep for some time");
+                            Thread.sleep(300l);//try again after some time
+                        } catch (Exception ex1) {
+                            Logger.debug("not able to sleep");
+                        }
+                        cacheApi.set(KEY_ORDER_DATA + currentDateStr, result.toString());
+                    }
                     orderDataList = getOrderDataFromJson(result.toString());
                     Logger.debug("test ="+orderDataList.size());
                 } catch (Exception ex) {

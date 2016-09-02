@@ -18,58 +18,54 @@ public class TestModule {
 
 		for (Map.Entry<Long, User> entry: userData.entrySet()) {
 			User user = entry.getValue();
-			if (user == null) {
-				//System.out.print("User not found :"+userId);
-			} else {
-				double userRating[] = CachedUserData.retrieveDataFromCache(cacheApi, user.user_id);
-				if (userRating == null) {
-					//System.out.print("User not found :"+userId);
-					notFoundUsers++;
-					continue;
+			double userRating[] = CachedUserData.retrieveDataFromCache(cacheApi, user.user_id);
+			if (userRating == null) {
+				System.out.print("User not found loading new user menu :"+user.user_id);
+				userRating = CachedUserData.retrieveDataFromCache(cacheApi, 0);
+				notFoundUsers++;
+			}
+			foundUsers++;
+			List<Pair<MenuItemBundle, Double>> bundleDoubleRating = new ArrayList<>();
+			int i = 0;
+			for (double rating : userRating) {
+				bundleDoubleRating.add(new Pair<>(MenuItemBundle.values()[i], rating));
+				i++;
+			}
+			Collections.sort(bundleDoubleRating, (a,b) -> ((a.getValue()-b.getValue() == 0?0:
+					a.getValue() - b.getValue() > 0?-1:1)));
+
+			for (Order order : user.orders) {
+				int size = 0;
+				for (OrderDetail orderDetail : order.orderDetails) {
+					MenuItemBundle menuItemBundle = MenuItemBundleReverseMap.getInstance()
+							.getMenuItemBundleMap().get(orderDetail.menu_item_id);
+					if (menuItemBundle == null) continue;
+					size++;
 				}
-				foundUsers++;
-				List<Pair<MenuItemBundle, Double>> bundleDoubleRating = new ArrayList<>();
-				int i = 0;
-				for (double rating : userRating) {
-					bundleDoubleRating.add(new Pair<>(MenuItemBundle.values()[i], rating));
-					i++;
+
+				if (size <= 0 || size > 4) continue;
+
+				int shouldBeInTop = shouldBeInTop(size);
+				int maxLimitForSuccess = failCase(size);
+				int mysuccess=0, myfailure=0, mytotal=0;
+				for (OrderDetail orderDetail : order.orderDetails) {
+					MenuItemBundle menuItemBundle = MenuItemBundleReverseMap.getInstance()
+							.getMenuItemBundleMap().get(orderDetail.menu_item_id);
+					if (menuItemBundle == null) continue;
+					if (isInTopNItems(bundleDoubleRating, menuItemBundle, shouldBeInTop)) {
+						mysuccess++;
+					} else if (!isInTopNItems(bundleDoubleRating, menuItemBundle, maxLimitForSuccess)) {
+						myfailure++;
+					}
+					mytotal++;
 				}
-				Collections.sort(bundleDoubleRating, (a,b) -> ((a.getValue()-b.getValue() == 0?0:
-																	a.getValue() - b.getValue() > 0?-1:1)));
 
-				for (Order order : user.orders) {
-					int size = 0;
-					for (OrderDetail orderDetail : order.orderDetails) {
-						MenuItemBundle menuItemBundle = MenuItemBundleReverseMap.getInstance()
-								.getMenuItemBundleMap().get(orderDetail.menu_item_id);
-						if (menuItemBundle == null) continue;
-						size++;
-					}
-
-					if (size <= 0 || size > 4) continue;
-
-					int shouldBeInTop = shouldBeInTop(size);
-					int maxLimitForSuccess = failCase(size);
-					int mysuccess=0, myfailure=0, mytotal=0;
-					for (OrderDetail orderDetail : order.orderDetails) {
-						MenuItemBundle menuItemBundle = MenuItemBundleReverseMap.getInstance()
-								.getMenuItemBundleMap().get(orderDetail.menu_item_id);
-						if (menuItemBundle == null) continue;
-						if (isInTopNItems(bundleDoubleRating, menuItemBundle, shouldBeInTop)) {
-							mysuccess++;
-						} else if (!isInTopNItems(bundleDoubleRating, menuItemBundle, maxLimitForSuccess)) {
-							myfailure++;
-						}
-						mytotal++;
-					}
-
-					if (myfailure > 0) {
-						failure[size - 1]++;
-					} else if (mysuccess == size){
-						success[size - 1]++;
-					}
-					total[size - 1]++;
+				if (myfailure > 0) {
+					failure[size - 1]++;
+				} else if (mysuccess == size){
+					success[size - 1]++;
 				}
+				total[size - 1]++;
 			}
 		}
 		System.out.println("\nSuccess");
