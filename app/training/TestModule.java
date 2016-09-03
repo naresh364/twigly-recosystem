@@ -9,21 +9,37 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 public class TestModule {
-	public void dataTesting(CacheApi cacheApi, Map<Long, User> userData) {
+
+	private double[] getDataForUser(CacheApi cacheApi, CachedUserData cachedUserData, long searchUser) {
+		if (cachedUserData != null) {
+			int i = cachedUserData.getUsers().indexOf(searchUser);
+			if (i < 0) {
+				i =0;
+				notFoundUsers++;
+				//return null;
+			}
+			return cachedUserData.getRatings()[i];
+		} else {
+			double userRating[] = CachedUserData.retrieveDataFromCache(cacheApi, searchUser);
+			if (userRating == null) {
+				userRating = CachedUserData.retrieveDataFromCache(cacheApi, 0);
+				notFoundUsers++;
+			}
+			return userRating;
+		}
+	}
+
+	int notFoundUsers = 0;
+	public void dataTesting(CacheApi cacheApi, Map<Long, User> userData, CachedUserData cachedUserData) {
 		int foundUsers = 0;
-		int notFoundUsers = 0;
 		int success[] = new int[4];
 		int failure[] = new int[4];
 		int total[] = new int[4];
 
 		for (Map.Entry<Long, User> entry: userData.entrySet()) {
 			User user = entry.getValue();
-			double userRating[] = CachedUserData.retrieveDataFromCache(cacheApi, user.user_id);
-			if (userRating == null) {
-				System.out.print("User not found loading new user menu :"+user.user_id);
-				userRating = CachedUserData.retrieveDataFromCache(cacheApi, 0);
-				notFoundUsers++;
-			}
+			double userRating[] = getDataForUser(cacheApi, cachedUserData, user.user_id);
+			if (userRating == null) continue;
 			foundUsers++;
 			List<Pair<MenuItemBundle, Double>> bundleDoubleRating = new ArrayList<>();
 			int i = 0;

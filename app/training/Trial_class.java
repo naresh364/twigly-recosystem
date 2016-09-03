@@ -9,14 +9,14 @@ import java.lang.*;
 
 public class Trial_class {
     int len = 50000;
-    int totalDishes = 17;
+    int totalDishes = MenuItemBundle.values().length;
     int orderThreshold = 1;
     int orderPriority = 8;
     int Y[][];
     int R[][];
     List<User> priorityUsers;
     double meanRating[];
-    int features = 15;
+    int features = User.features;
     int lambda = 11;
     //int lambda = 0;
     double alpha = 0.001;

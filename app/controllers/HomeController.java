@@ -21,8 +21,8 @@ import scala.reflect.ClassTag;
 import java.io.File;
 import java.util.*;
 
-import training.TestModule;
 import training.Trial_class;
+import training.TestModule;
 import play.Logger;
 import views.html.*;
 
@@ -61,13 +61,13 @@ public class HomeController extends Controller {
         Map<Long, User> testDatas = getDataFromCache(from, to);
 
         TestModule testModule = new TestModule();
-        testModule.dataTesting(cacheApi, testDatas);
+        testModule.dataTesting(cacheApi, testDatas, mCachedUserData);
 
         return ok("Done");
     }
 
     public Result train(String from, String to) {
-        int features = 15;
+        int features = User.features;
         int totalDishes = MenuItemBundle.values().length;
         Logger.info("A log message");
         Trial_class trial = new Trial_class();
@@ -104,7 +104,8 @@ public class HomeController extends Controller {
 
         //save calculated data to cache
         CachedUserData userData = new CachedUserData(ratings, trial.getPriorityUsers());
-        CachedUserData.saveDataToCache(cacheApi, userData);
+        mCachedUserData = userData;
+        //CachedUserData.saveDataToCache(cacheApi, userData);
         return ok(index.render("Your new application is ready."));
     }
 
