@@ -1,6 +1,5 @@
 package training;
 
-import javafx.util.Pair;
 import models.*;
 import play.cache.CacheApi;
 
