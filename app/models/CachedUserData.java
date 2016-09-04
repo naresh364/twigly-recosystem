@@ -1,9 +1,9 @@
 package models;
 
+import Utils.Pair;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import javafx.util.Pair;
 import play.Logger;
 import play.cache.CacheApi;
 import redis.clients.jedis.Jedis;
