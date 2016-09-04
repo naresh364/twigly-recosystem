@@ -61,13 +61,17 @@ public class HomeController extends Controller {
         Map<Long, User> testDatas = getDataFromCache(from, to);
 
         TestModule testModule = new TestModule();
-        testModule.dataTesting(cacheApi, testDatas, mCachedUserData);
+        String result = testModule.dataTesting(cacheApi, testDatas, mCachedUserData);
 
-        return ok("Done");
+        return ok(result);
     }
 
-    public Result train(String from, String to) {
-        int features = User.features;
+    public Result train(String from, String to, int features) {
+        if (features > 0) {
+            User.features = features;
+        } else {
+            features = User.features;
+        }
         int totalDishes = MenuItemBundle.values().length;
         Logger.info("A log message");
         Trial_class trial = new Trial_class();
@@ -102,11 +106,29 @@ public class HomeController extends Controller {
             }
         }
 
+        //printMatrix(X);
+
         //save calculated data to cache
         CachedUserData userData = new CachedUserData(ratings, trial.getPriorityUsers());
         mCachedUserData = userData;
-        //CachedUserData.saveDataToCache(cacheApi, userData);
+        CachedUserData.saveDataToCache(cacheApi, userData);
+        //return test("2016-08-01", "2016-08-31");
         return ok(index.render("Your new application is ready."));
+    }
+
+    public Result save() {
+        CachedUserData.saveDataToCache(cacheApi, mCachedUserData);
+        return ok("Done");
+    }
+
+    private void printMatrix(double rating[][]) {
+        for (int i = 0; i < rating.length; i++) {
+            for (int j =0; j < rating[i].length; j++) {
+                System.out.print(rating[i][j]+",");
+            }
+            System.out.println();
+        }
+
     }
 
     public Result processTestCase() {

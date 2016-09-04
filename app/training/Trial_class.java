@@ -31,7 +31,7 @@ public class Trial_class {
         double sig = 0.5;
         double internal = 0.1;
         double external = 3.0;
-        double MAX = 20;
+        double MAX = 2000;
         double RATIO = 100;
         int red = 1;
 
@@ -233,7 +233,7 @@ public class Trial_class {
         int temp = 0;
 
         priorityUsers = new ArrayList<>();
-        priorityUsers.add(0, new User());
+        //priorityUsers.add(0, new User());
 
         for (Map.Entry<Long, User> entry : userData.entrySet()) {
             long orderCount = entry.getValue().orders.size();
@@ -257,8 +257,8 @@ public class Trial_class {
             for (MenuItemBundle bundle : MenuItemBundle.values()) {
                 UserParams userParams = user.itemBundleCountMap.get(bundle);
 
-                Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)*userParams.averageRating/maxvalue)+1);
-                Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)*(userParams.averageRating)/maxvalue)+1);
+                Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)/maxvalue)+1);
+                Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)/maxvalue)+1);
                 //Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)*Math.pow(userParams.averageRating,2)/maxvalue)+1);
                 //Y[i][j] = (userParams == null ? 1 : (int)((9*userParams.count)/maxvalue)+1);
                 int tempo = (userParams == null)?0:userParams.count;

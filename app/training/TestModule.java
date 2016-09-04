@@ -10,27 +10,30 @@ import java.util.*;
 
 public class TestModule {
 
-	private double[] getDataForUser(CacheApi cacheApi, CachedUserData cachedUserData, long searchUser) {
+	private List<Long> getDataForUser(CachedUserData cachedUserData, long searchUser) {
 		if (cachedUserData != null) {
-			int i = cachedUserData.getUsers().indexOf(searchUser);
-			if (i < 0) {
-				i =0;
+			List<Long> menuPref = cachedUserData.useridVsMenuPrefMap.get(searchUser);
+			if (menuPref == null) {
 				notFoundUsers++;
-				//return null;
+				menuPref = cachedUserData.useridVsMenuPrefMap.get(0);
+				return null;
 			}
-			return cachedUserData.getRatings()[i];
-		} else {
-			double userRating[] = CachedUserData.retrieveDataFromCache(cacheApi, searchUser);
-			if (userRating == null) {
-				userRating = CachedUserData.retrieveDataFromCache(cacheApi, 0);
-				notFoundUsers++;
-			}
-			return userRating;
+			return menuPref;
 		}
+		return null;
+	}
+
+	private List<Long> getDataForUser(CacheApi cacheApi, long searchUser) {
+		List<Long> menuItemId = CachedUserData.retrieveDataFromCache(cacheApi, searchUser);
+		if (menuItemId == null) {
+			menuItemId = CachedUserData.retrieveDataFromCache(cacheApi, 0);
+			notFoundUsers++;
+		}
+		return menuItemId;
 	}
 
 	int notFoundUsers = 0;
-	public void dataTesting(CacheApi cacheApi, Map<Long, User> userData, CachedUserData cachedUserData) {
+	public String dataTesting(CacheApi cacheApi, Map<Long, User> userData, CachedUserData cachedUserData) {
 		int foundUsers = 0;
 		int success[] = new int[4];
 		int failure[] = new int[4];
@@ -38,17 +41,9 @@ public class TestModule {
 
 		for (Map.Entry<Long, User> entry: userData.entrySet()) {
 			User user = entry.getValue();
-			double userRating[] = getDataForUser(cacheApi, cachedUserData, user.user_id);
-			if (userRating == null) continue;
+			List<Long> menuItemIds = getDataForUser(cachedUserData, user.user_id);
+			if (menuItemIds == null) continue;
 			foundUsers++;
-			List<Pair<MenuItemBundle, Double>> bundleDoubleRating = new ArrayList<>();
-			int i = 0;
-			for (double rating : userRating) {
-				bundleDoubleRating.add(new Pair<>(MenuItemBundle.values()[i], rating));
-				i++;
-			}
-			Collections.sort(bundleDoubleRating, (a,b) -> ((a.getValue()-b.getValue() == 0?0:
-					a.getValue() - b.getValue() > 0?-1:1)));
 
 			for (Order order : user.orders) {
 				int size = 0;
@@ -68,9 +63,9 @@ public class TestModule {
 					MenuItemBundle menuItemBundle = MenuItemBundleReverseMap.getInstance()
 							.getMenuItemBundleMap().get(orderDetail.menu_item_id);
 					if (menuItemBundle == null) continue;
-					if (isInTopNItems(bundleDoubleRating, menuItemBundle, shouldBeInTop)) {
+					if (isInTopNItems(menuItemIds, orderDetail.menu_item_id, shouldBeInTop)) {
 						mysuccess++;
-					} else if (!isInTopNItems(bundleDoubleRating, menuItemBundle, maxLimitForSuccess)) {
+					} else if (!isInTopNItems(menuItemIds, orderDetail.menu_item_id, maxLimitForSuccess)) {
 						myfailure++;
 					}
 					mytotal++;
@@ -84,25 +79,28 @@ public class TestModule {
 				total[size - 1]++;
 			}
 		}
-		System.out.println("\nSuccess");
-		printArray(success);
-		System.out.println("Failure");
-		printArray(failure);
-		System.out.println("Total");
-		printArray(total);
 		int sumValue = userData.size() - foundUsers;
-		System.out.println("done for users :"+foundUsers);
-		System.out.println("users entry not found:"+notFoundUsers);
-		System.out.println("not done for users :"+sumValue);
+		String val = "\nSuccess\n";
+		val += printArray(success);
+		val += "\nFailure\n";
+		val += printArray(failure);
+		val += "\nTotal\n";
+		val += printArray(total);
+		val += "\n Accuracy = "+(100*success[0]/total[0])+" %, "+(100*failure[0]/total[0])+" %";
+		val += "\ndone for users :"+foundUsers +
+			"\nusers entry not found:"+notFoundUsers+
+			"\nnot done for users :"+sumValue;
 
-
+		return val;
 	}
 
-	private void printArray(int[] vals){
+	private String printArray(int[] vals){
+		String out = "";
 		for (int val :vals) {
-			System.out.print(val + ", ");
+			out += val + ", ";
 		}
-		System.out.println("");
+		out += "\n";
+		return out;
 	}
 
 	private int failCase(int size) {
@@ -127,15 +125,22 @@ public class TestModule {
 		return 0;
 	}
 
-	public boolean isInTopNItems(List<Pair<MenuItemBundle, Double>> bundleRatingList, MenuItemBundle searchBundle, int n) {
-		int i = 0;
-		for (Pair<MenuItemBundle, Double> pair : bundleRatingList) {
-			if (i > n) return false;
-			i++;
-			MenuItemBundle bundle = pair.getKey();
-			if (bundle == searchBundle) {
+	public boolean isInTopNItems(List<Long> menuItemIds, long searchId, int n) {
+		int i = 0, j=0;
+		if (menuItemIds == null || menuItemIds.isEmpty()) return false;
+		MenuItemBundle bundle = MenuItemBundleReverseMap.getInstance().getMenuItemBundleMap().get(menuItemIds.get(0));
+		for (Long menuItemId : menuItemIds) {
+			if (j > n) return false;
+			MenuItemBundle newbundle
+					= MenuItemBundleReverseMap.getInstance().getMenuItemBundleMap().get(menuItemIds.get(i));
+			if (searchId == menuItemId) {
 				return true;
 			}
+			if (newbundle != bundle) {
+				j++;
+				bundle = newbundle;
+			}
+			i++;
 		}
 		return false;
 	}

@@ -16,9 +16,10 @@ GET     /message                    controllers.AsyncController.message
 
 GET     /fetch                      controllers.FetchDataController.fetch(from?="-1", to?="-1")
 GET     /clear                      controllers.FetchDataController.clear(from?="-1", to?="-1")
-GET     /train                      controllers.HomeController.train(from?="-1", to?="-1")
+GET     /train                      controllers.HomeController.train(from?="-1", to?="-1", features:Integer?=-1)
 GET     /test                       controllers.HomeController.test(from?="-1", to?="-1")
 GET     /testcase                   controllers.HomeController.processTestCase()
+GET     /save                       controllers.HomeController.save
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

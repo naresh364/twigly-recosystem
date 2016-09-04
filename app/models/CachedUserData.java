@@ -3,58 +3,82 @@ package models;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import javafx.util.Pair;
 import play.Logger;
 import play.cache.CacheApi;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by naresh on 30/08/16.
  */
 public class CachedUserData {
-    public double ratings[][];
-    public List<Long> users;
+    public Map<Long, List<Long>> useridVsMenuPrefMap;
 
     public CachedUserData(double ratings[][], List<User> users) {
-        this.ratings = ratings;
-        this.users = new ArrayList<>(users.size());
-        for (User user : users) {
-            this.users.add(user.user_id);
+        useridVsMenuPrefMap = new HashMap<>();
+        for (int i=0; i < users.size(); i++) {
+
+            List<Long> itemPreference = getSortedMenuItemList(ratings[i]);
+            useridVsMenuPrefMap.put(users.get(i).user_id, itemPreference);
         }
     }
 
     public CachedUserData(){
     };
 
-    public double[][] getRatings() {
-        return ratings;
-    }
+    public List<Long> getSortedMenuItemList(double[] userRating) {
+        List<Pair<MenuItemBundle, Double>> bundleDoubleRating = new ArrayList<>();
+        int j = 0;
+        for (double rating : userRating) {
+            bundleDoubleRating.add(new Pair<>(MenuItemBundle.values()[j], rating));
+            j++;
+        }
+        Collections.sort(bundleDoubleRating, (a, b) -> ((a.getValue() - b.getValue() == 0 ? 0 :
+                a.getValue() - b.getValue() > 0 ? -1 : 1)));
 
-    public void setRatings(double[][] ratings) {
-        this.ratings = ratings;
-    }
+        List<MenuItemBundle> sortedMenuItemBundles = new ArrayList<>();
+        List<Long> sortedMenuItems = new ArrayList<>(userRating.length*3);
+        for (Pair<MenuItemBundle, Double> pair : bundleDoubleRating) {
+            MenuItemBundle menuItemBundle = pair.getKey();
+            sortedMenuItemBundles.add(menuItemBundle);
+        }
 
-    public List<Long> getUsers() {
-        return users;
-    }
+        for (MenuItemBundle menuItemBundle:MenuItemBundle.values()) {
+            float factor = menuItemBundle.getMinPositionFactor();
 
-    public void setUsers(List<Long> users) {
-        this.users = users;
+            if (factor == 0) continue;
+            if (factor > 1) factor = 1;
+
+            int minPosition = (int)(sortedMenuItemBundles.size()*factor);
+            int currentPosition = sortedMenuItemBundles.indexOf(menuItemBundle);
+            if (currentPosition < minPosition) {
+                MenuItemBundle bundle = sortedMenuItemBundles.remove(currentPosition);
+                sortedMenuItemBundles.add(minPosition, bundle);
+            }
+        }
+
+        for (MenuItemBundle menuItemBundle : sortedMenuItemBundles) {
+            sortedMenuItems.addAll(menuItemBundle.getMenu_item_ids());
+        }
+
+        return sortedMenuItems;
     }
 
     public static String key_training_data = "KEY_TRAINING_DATA:";
 
     public static void saveDataToCache(CacheApi cacheApi, CachedUserData cachedUserData) {
-        for (int i =0; i < cachedUserData.getUsers().size();i++) {
+        for (Map.Entry<Long, List<Long>> entry : cachedUserData.useridVsMenuPrefMap.entrySet()) {
+            Long userId = entry.getKey();
+            List<Long> sortedMenuItems = entry.getValue();
             ObjectMapper objectMapper = new ObjectMapper();
-            ArrayNode objectNode = objectMapper.valueToTree(cachedUserData.ratings[i]);
-            System.out.println("Data saved to cache of :"+cachedUserData.getUsers().get(i));
+            ArrayNode objectNode = objectMapper.valueToTree(sortedMenuItems);
+            System.out.println("Data saved to cache of :"+userId);
             try {
-                cacheApi.set(key_training_data + cachedUserData.getUsers().get(i), objectNode.toString());
+                cacheApi.set(key_training_data + userId, objectNode.toString());
             } catch (JedisConnectionException ex) {
                 try {
                     Logger.debug("GOing to sleep for some time");
@@ -62,23 +86,23 @@ public class CachedUserData {
                 } catch (Exception ex1) {
                     Logger.debug("not able to sleep");
                 }
-                cacheApi.set(key_training_data + cachedUserData.getUsers().get(i), objectNode.toString());
+                cacheApi.set(key_training_data + userId, objectNode.toString());
             }
         }
     }
 
-    public static double[] retrieveDataFromCache(CacheApi cacheApi, long userId) {
+    public static List<Long> retrieveDataFromCache(CacheApi cacheApi, long userId) {
         String dataStr = cacheApi.get(key_training_data+userId);
         if (dataStr == null) return null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            double[] rating = objectMapper.readValue(dataStr, new TypeReference<double[]>(){});
-            if (rating == null) {
+            List<Long> menuItemIds = objectMapper.readValue(dataStr, new TypeReference<List<Long>>(){});
+            if (menuItemIds == null) {
                 System.out.println("retrieve failed data for :" + userId);
             } else {
                 System.out.println("retrieved data for :" + userId);
             }
-            return rating;
+            return menuItemIds;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
