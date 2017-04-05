@@ -64,7 +64,7 @@ public class FetchDataController extends Controller {
 
         while (!currentDate.after(toDate)) {
             String currentDateStr = AppUtils.getDateStr(currentDate);
-            String orderDataStr = cacheApi.get(KEY_ORDER_DATA+currentDateStr);
+            String orderDataStr = AppUtils.decompress(cacheApi.get(KEY_ORDER_DATA+currentDateStr));
             List<OrderData> orderDataList = getOrderDataFromJson(orderDataStr);
             if (orderDataList == null || orderDataList.isEmpty()) {
                 //fetch from the server
@@ -81,7 +81,7 @@ public class FetchDataController extends Controller {
                     JsonNode result = completableFuture.get().get("data");
                     //Logger.debug("result =" + result.toString());
                     try {
-                        cacheApi.set(KEY_ORDER_DATA + currentDateStr, result.toString());
+                        cacheApi.set(KEY_ORDER_DATA + currentDateStr, AppUtils.compress(result.toString()));
                     } catch (JedisConnectionException ex) {
                         ex.printStackTrace();
                         //retry
@@ -91,7 +91,7 @@ public class FetchDataController extends Controller {
                         } catch (Exception ex1) {
                             Logger.debug("not able to sleep");
                         }
-                        cacheApi.set(KEY_ORDER_DATA + currentDateStr, result.toString());
+                        cacheApi.set(KEY_ORDER_DATA + currentDateStr, AppUtils.compress(result.toString()));
                     }
                     orderDataList = getOrderDataFromJson(result.toString());
                     Logger.debug("test ="+orderDataList.size());

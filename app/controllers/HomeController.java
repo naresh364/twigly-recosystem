@@ -236,7 +236,7 @@ public class HomeController extends Controller {
 
         while (!currentDate.after(toDate)) {
             String currentDateStr = AppUtils.getDateStr(currentDate);
-            String orderDataStr = cacheApi.get(FetchDataController.KEY_ORDER_DATA+currentDateStr);
+            String orderDataStr = AppUtils.decompress(cacheApi.get(FetchDataController.KEY_ORDER_DATA+currentDateStr));
             List<OrderData> orderDataList = FetchDataController.getOrderDataFromJson(orderDataStr);
             if (orderDataList != null && !orderDataList.isEmpty()) {
                 for (OrderData orderData : orderDataList) {

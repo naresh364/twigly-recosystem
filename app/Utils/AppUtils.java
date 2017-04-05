@@ -1,6 +1,9 @@
 package Utils;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Created by naresh on 28/08/16.
@@ -65,35 +69,40 @@ public class AppUtils {
         return diff;
     }
 
-    public static String compress(String str) {
+    public static byte[] compress(String str) {
         if (str == null || str.length() == 0) {
-            return str;
+            return null;
         }
 
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            GZIPOutputStream gzip = new GZIPOutputStream(out);
-            gzip.write(str.getBytes());
-            gzip.close();
-            return out.toString("ISO-8859-1");
+            ByteArrayOutputStream baostream = new ByteArrayOutputStream();
+            GZIPOutputStream outStream = new GZIPOutputStream(baostream);
+            outStream.write(str.getBytes("UTF-8"));
+            outStream.close();
+            byte[] compressedBytes = baostream.toByteArray();
+            return compressedBytes;
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
-    public static String decompress(String str) {
-        //TODO
-        if (str == null || str.length() == 0) {
-            return str;
+    public static String decompress(byte[] compressedBytes) {
+        if (compressedBytes == null) {
+            return null;
         }
 
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            GZIPOutputStream gzip = new GZIPOutputStream(out);
-            gzip.write(str.getBytes());
-            gzip.close();
-            return out.toString("ISO-8859-1");
+            GZIPInputStream inStream = new GZIPInputStream(
+                    new ByteArrayInputStream(compressedBytes));
+            ByteArrayOutputStream baoStream2 = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = inStream.read(buffer)) > 0) {
+                baoStream2.write(buffer, 0, len);
+            }
+            String uncompressedStr = baoStream2.toString("UTF-8");
+            return uncompressedStr;
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
