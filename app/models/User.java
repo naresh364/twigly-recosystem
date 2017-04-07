@@ -11,7 +11,7 @@ import java.util.Map;
  * Created by naresh on 29/08/16.
  */
 public class User {
-    public static int features = 22;
+    public static int features = 18;
     public long user_id;
     public List<Order> orders = new ArrayList<>();
     public Map<Long, Integer> itemCountMap = new HashMap<>();
